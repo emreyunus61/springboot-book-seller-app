@@ -1,6 +1,8 @@
 package com.example.springbootbooksellerapp.security;
 
+import com.example.springbootbooksellerapp.model.Role;
 import com.example.springbootbooksellerapp.model.User;
+import com.example.springbootbooksellerapp.util.SecurityUtils;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +24,20 @@ public class UserPrincipal implements UserDetails {
     transient  private User user ;  //sadece oturum açma işlemi için kullanıcı, JWT'de kullanmayın.
 
     private Set<GrantedAuthority> authorities;
+
+
+
+    public  static  UserPrincipal createSuperUser(){
+
+        Set<GrantedAuthority> authorities1 = Set.of(SecurityUtils.convertToAuthority(Role.SYSTEM_MANAGER.name()));
+
+        return  UserPrincipal.builder()
+
+                .id(-1L)
+                .username("system-adminsrator")
+                .authorities(authorities1)
+                .build();
+    }
 
 
 

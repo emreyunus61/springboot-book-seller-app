@@ -2,6 +2,7 @@ package com.example.springbootbooksellerapp.security;
 
 import com.example.springbootbooksellerapp.security.jwt.JwtAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration //Bean oluşturmak için bu anatasyona gerek vardır
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Value("${authentication.internal-api-key}")
+    private  String internalApiKey;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -58,6 +62,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         //jwt filter
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
+
+
+    @Bean
+    public  InternalApiAuthenticationFilter internalApiAuthenticationFilter(){
+        return new InternalApiAuthenticationFilter(internalApiKey);
     }
 
 
