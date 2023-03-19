@@ -16,10 +16,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter
     @Autowired //bu filtrernin bir spring nesnesi olmadığı için @Autowired  kullanıamıyoruz, spring security sınıfından bean yaratılarak yani bir spring nesnesi olduğu belirtmemiz gerek
     private IJwtProvider jwtProvider;
 
+
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException
-    {
-        return request.getRequestURI().startsWith("/api/internal");
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return !request.getRequestURI().startsWith("api/internal");
     }
 
     @Override   //Kimlik doğrulama
