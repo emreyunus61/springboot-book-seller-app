@@ -3,76 +3,75 @@ package com.example.springbootbooksellerapp.security;
 import com.example.springbootbooksellerapp.model.Role;
 import com.example.springbootbooksellerapp.model.User;
 import com.example.springbootbooksellerapp.util.SecurityUtils;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Set;
 
-@Data
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class UserPrincipal implements UserDetails {
-
-
+public class UserPrincipal implements UserDetails
+{
     private Long id;
     private String username;
-
-    transient  private  String password; //serbest bırakılmış yerlerde görünme
-
-    transient  private User user ;  //sadece oturum açma işlemi için kullanıcı, JWT'de kullanmayın.
-
+    transient private String password; //don't show up on an searialized places
+    transient private User user; //user for only login operation, don't use in JWT.
     private Set<GrantedAuthority> authorities;
 
+    public static UserPrincipal createSuperUser()
+    {
+        Set<GrantedAuthority> authorities = Set.of(SecurityUtils.convertToAuthority(Role.SYSTEM_MANAGER.name()));
 
-
-    public  static  UserPrincipal createSuperUser(){
-
-        Set<GrantedAuthority> authorities1 = Set.of(SecurityUtils.convertToAuthority(Role.SYSTEM_MANAGER.name()));
-
-        return  UserPrincipal.builder()
-
+        return UserPrincipal.builder()
                 .id(-1L)
-                .username("system-adminsrator")
-                .authorities(authorities1)
+                .username("system-administrator")
+                .authorities(authorities)
                 .build();
     }
 
-
-
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<? extends GrantedAuthority> getAuthorities()
+    {
         return authorities;
     }
 
     @Override
-    public String getPassword() {
+    public String getPassword()
+    {
         return password;
     }
 
     @Override
-    public String getUsername() {
+    public String getUsername()
+    {
         return username;
     }
 
     @Override
-    public boolean isAccountNonExpired() {
+    public boolean isAccountNonExpired()
+    {
         return true;
     }
 
     @Override
-    public boolean isAccountNonLocked() {
+    public boolean isAccountNonLocked()
+    {
         return true;
     }
 
     @Override
-    public boolean isCredentialsNonExpired() {
+    public boolean isCredentialsNonExpired()
+    {
         return true;
     }
 
     @Override
-    public boolean isEnabled() {
+    public boolean isEnabled()
+    {
         return true;
     }
 }

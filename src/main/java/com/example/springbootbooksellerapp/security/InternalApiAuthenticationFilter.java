@@ -14,46 +14,45 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-public class InternalApiAuthenticationFilter extends OncePerRequestFilter { //SÜPER KULLANICI KATMANI
+public class InternalApiAuthenticationFilter extends OncePerRequestFilter
+{
+    private final String accessKey;
 
-    private  final  String accesKey;
-
-    public  InternalApiAuthenticationFilter(String accesKey){
-        this.accesKey=accesKey;
+    public InternalApiAuthenticationFilter(String accessKey)
+    {
+        this.accessKey = accessKey;
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return !request.getRequestURI().startsWith("api/internal");
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException
+    {
+        return !request.getRequestURI().startsWith("/api/internal");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-
-        try {
+            throws ServletException, IOException
+    {
+        try
+        {
             String requestKey = SecurityUtils.extractAuthTokenFromRequest(request);
 
-            if (requestKey==null || !requestKey.equals(accesKey)){ //internalsecurity key ile aynı değilse hata ver
-
-                log.warn("Internal key endpoint requested without/wrong key uri : {}", request.getRequestURI());
-                throw  new RuntimeException("UNAUTHORIZED");
-
+            if (requestKey == null || !requestKey.equals(accessKey))
+            {
+                log.warn("Internal key endpoint requested without/wrong key uri: {}", request.getRequestURI());
+                throw new RuntimeException("UNAUTHORIZED");
             }
 
             UserPrincipal user = UserPrincipal.createSuperUser();
-
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
-
+                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
         }
         catch (Exception ex)
         {
-            log.error("Could not set user authentication in security context",ex);
+            log.error("Could not set user authentication in security context", ex);
         }
-        filterChain.doFilter(request,response);
+
+        filterChain.doFilter(request, response);
     }
 }

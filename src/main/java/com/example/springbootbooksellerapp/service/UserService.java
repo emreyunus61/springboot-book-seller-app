@@ -49,7 +49,7 @@ public class UserService implements  IUserService {
     @Transactional
     public  void makeAdmin(String username) {
 
-        userRepository.updateUserRole(username,Role.ADMİN);
+        userRepository.updateUserRole(username,Role.ADMIN);
     }
 
 }

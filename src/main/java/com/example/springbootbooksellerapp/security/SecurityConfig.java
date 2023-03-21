@@ -21,75 +21,64 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration //Bean oluşturmak için bu anatasyona gerek vardır
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
+public class SecurityConfig extends WebSecurityConfigurerAdapter
+{
     @Value("${authentication.internal-api-key}")
-    private  String internalApiKey;
+    private String internalApiKey;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
-
     @Override
-    //kimlik doğrulmasından sorumludur (AuthenticationManagerBuilder)
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception
+    {
         auth.userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());
     }
 
-
-    //authentication manager bean oluşturur
     @Override
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
-    public AuthenticationManager authenticationManagerBean() throws Exception {
+    public AuthenticationManager authenticationManagerBean() throws Exception
+    {
         return super.authenticationManagerBean();
     }
 
-    // farklı domainlerden erişilebilirli ayarlayan method
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
-        http.cors(); //CORS, HTTP header'larını kullanarak, bir origin'de (kök, köken) çalışan web uygulamasının veya websitesinin, farklı bir origin'de yer alan web uygulamasına veya websitesine olan erişim izni kontrolünü sağlayan yapıdır.
+    protected void configure(HttpSecurity http) throws Exception
+    {
+        http.cors();
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        // istek izinlerinin ayarlanması
-
         http.authorizeRequests()
                 .antMatchers("/api/authentication/**").permitAll()
-                .antMatchers(HttpMethod.GET,"api/book").permitAll()
-                .antMatchers("api/book/**").hasRole(Role.ADMİN.name())
-                .antMatchers("api/internal/**").hasRole(Role.SYSTEM_MANAGER.name())
+                .antMatchers(HttpMethod.GET, "/api/book").permitAll()
+                .antMatchers("/api/book/**").hasRole(Role.ADMIN.name())
+                .antMatchers("/api/internal/**").hasRole(Role.SYSTEM_MANAGER.name())
                 .anyRequest().authenticated();
 
-
         //jwt filter
-        //internal>jwt>authentication
+        //internal > jwt > authentication
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(internalApiAuthenticationFilter(), JwtAuthorizationFilter.class);
     }
 
-
     @Bean
-    public  InternalApiAuthenticationFilter internalApiAuthenticationFilter(){
+    public InternalApiAuthenticationFilter internalApiAuthenticationFilter()
+    {
         return new InternalApiAuthenticationFilter(internalApiKey);
     }
 
-
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter()
+    {
+        return new JwtAuthorizationFilter();
+    }
 
     @Bean
-    //JwtAuthorizationFilter NESNESİ OLUŞTURUP BEAN ANATASYONU İLE GEREKLİ SINIFTA SPRİNG ANATASIYONLARINI KULLANABİLDİK
-   public JwtAuthorizationFilter jwtAuthorizationFilter(){
-        return  new JwtAuthorizationFilter();
-   }
-
-
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-
-        return  new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder()
+    {
+        return new BCryptPasswordEncoder();
     }
 
 
@@ -110,5 +99,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             }
         };
     }
-
 }
